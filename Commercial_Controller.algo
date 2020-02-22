@@ -1,0 +1,329 @@
+Column
+  currentFloor
+  requestedDirection
+  buttonLight
+  total Floor
+  total Column
+ 
+
+Elevator
+  total Elevator
+  elevatorDoor
+  elevatorFloor
+  elevatorDirection
+  floorButton
+  elevatorStatus
+  weightSensor
+  heavyElevatorMessage
+  elevatorButtonLight
+  maximumWeight 
+  floorRequest
+  requestedFloor
+
+
+Total floor - Basement floor = Above floors
+Total column - Basement column = Above columns
+Above floors / Above columns = floors per columns
+
+
+
+Total floor = 66
+Basement floor = 6
+Total column = 4
+
+SET battery to 4 columns
+
+SET columnsList to columnA, columnB, columnC, columnD
+
+
+SET columnAElevatorList TO elevators A1, A2, A3
+SET columnAFloorList to floors SS6 to 1
+
+SET columnBElevatorList  to elevators B1, B2, B3
+SET columnBFloorList to floors 2 to 20
+
+SET columnCElevatorList  to elevators C1, C2, C3
+SET columnCFloorList to floors 21 to 40
+
+SET columnDElevatorList  to elevators D1, D2, D3
+SET columnDFloorList to floors 41 to 60
+
+SET elevatorFloorDisplay to currentFloor
+SET lobbyFloorDisplayconsole to SHOW all available floors
+
+
+total elevator = 12
+
+Maxweightlimit = 3500 lbs
+
+
+
+
+
+ '------------REQUESTED FLOOR---------------
+-----
+SEQUENCE "callFloor" USING requestedFloor
+  CALL findColumn WITH requestedFloor RETURNING column
+  CALL buttonLightOn WITH requestedDirection AND currentFloor
+  CALL findBestElevators WITH requestedDirection AND currentFloor 
+  CALL sendRequest WITH elevator AND floor
+END SEQUENCE
+
+
+' ------------CURRENTFLOOR BUTTON LIGHT ON-----------
+-----
+SEQUENCE "buttonLightOn" USING requestedDirection AND currentfloor
+  IF requestedDirection is not equal to elevatorDirection "OR" currentfloor is not equal to elevatorFloor THEN          
+    SET buttonLight TO ON                                                               
+END SEQUENCE
+
+' --------------CURRENTFLOOR BUTTON LIGHT OFF---------------
+----
+SEQUENCE "buttonLightOff" USING requestedDirection AND currentfloor
+  IF requestedDirection equals elevatorDirection "AND" currentfloor equals elevatorFloor THEN
+     SET buttonLight TO OFF
+END SEQUENCE
+
+
+
+' -------FINDS WHICH CURRENTFLOOR BUTTON HAS BEEN PRESSED-----------------
+
+SEQUENCE "findFloorButton" USING requestedFloor                    
+   FOR EACH floorButton IN floorButtons                                   
+       IF requestedFloor equals floorButton THEN
+           RETURN floorButton
+       END IF
+   END FOR
+END SEQUENCE
+
+
+' -----------FIND THE BEST ELEVATORS--------------------------------------
+----
+SEQUENCE "findBestElevators" USING requestedDirection AND currentfloor
+  CALL "findColumn" USING requestedFloor RETURNING column
+  SET columnElevatorList to column
+  FOR EACH  elevator in designated columnElevatorList
+   
+      '--CURRENTFLOOR = ELEVATORFLOOR && CURRENT DIRECTION = ELEVATORDIRECTION && ELEVATORSTATUS--'
+    IF currentfloor equals elevatorFloor "AND" requestedDirection equals elevatorDirection "AND" elevatorStatus equals stopped THEN
+      RETURN elevator
+
+        '-- CURRENTFLOOR > ELEVATORFLOOR && ELEVATORSTATUS = MOVING OR STOPPED && ELEVATORDIRECTION = requestedDirection'
+        ELSE IF currentfloor is greater than elevatorFloor "AND" elevatorStatus IS moving OR stopped "AND" elevatorDirection equals requestedDirection THEN
+          CALL findClosestElevator WITH currentfloor AND elevatorFloor AND requestedDirection 
+            RETURNING closestElevator
+
+         RETURN closestElevator
+
+        '-- CURRENTFLOOR < ELEVATORFLOOR && ELEVATORSTATUS = MOVING OR STOPPED && ELEVATORDIRECTION = requestedDirection'
+        ELSE IF currentfloor is less than elevatorFloor "AND" elevatorStatus IS moving OR stopped "AND" elevatorDirection equals requestedDirection THEN
+          CALL findClosestElevator WITH currentfloor AND elevatorFloor AND requestedDirection 
+            RETURNING closestElevator
+         RETURN closestElevator
+
+        '--CURRENTFLOOR = ELEVATORFLOOR && ELEVATORSTATUS = IDLE'
+        ELSE IF currentfloor equals elevatorFloor AND elevatorStatus equals IDLE THEN
+         RETURN elevator         
+
+        '--ELEVATORSTATUS = IDLE--'
+        ELSE IF elevatorStatus IS idle THEN
+          CALL findClosestElevator WITH currentfloor AND elevatorFloor AND requestedDirection
+          RETURN elevator
+    
+        END IF
+    END FOR
+    CALL findLessBusyElevator RETURNING lessBusyElevator
+    RETURN lessBusyElevator
+END SEQUENCE
+
+
+' ------------FIND THE CLOSEST ELEVATOR OF THE USER CALL--------------------------
+-----
+SEQUENCE "findClosestElevator" USING currentFloor AND elevatorFloor AND requestedDirection
+
+      '--DIFFLOOR = CURRENTFLOOR - ELEVATORFLOOR--'
+  COMPUTE difFloor as difference between currentfloor AND elevatorFloor 
+    SET shortestGap TO difFloor
+ 
+  FOR EACH elevator in designated columnElevatorList
+    IF elevatorDirection equals requestedDirection THEN
+     COMPUTE Gap as difference between currentfloor AND elevatorFloor 
+      IF gap is less than shortestGap 
+        SET shortestGap TO gap
+      END IF
+    END IF
+  END FOR
+    DETERMINE closestElevator WITH shortestGap
+      RETURN closestElevator
+END SEQUENCE
+
+//' --------------FIND LESS BUSY ELEVATOR -----------------------------------------------------
+-----
+SEQUENCE "findLessBusyElevator" USING elevatorFloor and elevatorDirection and totalFloor
+  COMPUTE difFloor as difference between totalFloor AND elevatorFloor 
+      SET shortestGap TO difFloor
+   FOR EACH elevator in designated columnElevatorList
+    IF elevatorDirection equals up THEN
+     COMPUTE Gap as difference between totalFloor AND elevatorFloor 
+      IF gap is less than shortestGap 
+        SET shortestGap TO gap
+    ELSE IF elevatorDirection equals down THEN
+     COMPUTE Gap as difference between elevatorFloor AND 1 
+      IF gap is less than shortestGap 
+        SET shortestGap TO gap
+    END IF
+  END FOR
+    DETERMINE lessBusyElevator WITH shortestGap
+      RETURN lessBusyElevator
+END SEQUENCE
+
+
+//' -------------MOVE THE ELEVATOR UP-----------------------------------------
+-----
+SEQUENCE "elevatorUp" USING elevatorFloor AND currentFloor
+   FOR EACH Elevator in Elevators
+   SHOW elevatorFloorDisplay
+       IF currentFloor "OR" requestedFloor is less than elevatorFloor
+           INCREMENT elevatorFloor by 1
+           REPEAT-UNTIL currentFloor "OR" requestedFloor equals elevatorFloor
+       END IF
+   END FOR
+END SEQUENCE
+//' -------------MOVE THE ELEVATOR DOWN---------------------------------------
+-------
+SEQUENCE "elevatorDown" USING elevatorFloor AND currentFloorr
+   FOR EACH Elevator in Elevators
+    SHOW elevatorFloorDisplay
+       IF currentFloor "OR" requestedFloor is less than elevator_floor
+           DECREMENT elevatorFloor by 1
+           REPEAT-UNTIL currentFloor "OR" requestedFloor equals elevatorFloor
+       END IF
+   END FOR
+END SEQUENCE
+
+
+//' -------------OPEN DOOR-------------------------------------------------------
+ -----                                              
+SEQUENCE "openDoors"
+  SET door equals open
+    IF door equals open THEN
+    SET timer to 7 seconds THEN
+         CALL "closeDoors"    
+    ELSE stay Open
+    END IF
+END SEQUENCE
+
+//' --------------CLOSE DOOR----------------------------------------------
+-----
+SEQUENCE "closeDoors"
+  CALL elevatorOverweight RETURNING 
+  SET door equals close
+    IF door IS not obstruct OR elevatorOverweight THEN
+        Close door 
+    ELSE IF door IS obstruct OR elevatorOverweight THEN
+        CALL "openDoors"
+    END IF
+END SEQUENCE
+
+
+//' --------ELEVATOR STATUS---------------------------------------------------------------- 
+------
+         '-- MOVING ELAVATUER UP OR DOWM --'
+SEQUENCE "movingStatus"
+  IF elevator is moving up or down
+  SET elevator TO moving
+  END IF
+END SEQUENCE
+
+        '--IDLE = NOT MOVING AND "NOT" IN OPERATION--'
+SEQUENCE "idleStatus"
+  IF elevator is stopped and floorList equals 0
+  SET elevator TO idle
+  END IF
+END SEQUENCE
+        '--STOPPED = MOVING BUT "IS" IN OPERATION'        
+SEQUENCE "stoppedStatus"
+  IF elevator is stopped and floorList is not equal to 0
+  SET elevator TO stopped
+  END IF
+END SEQUENCE
+
+
+
+//' --------------------OVER WEIGHT----------------------------------------
+---- 
+SEQUENCE "overWeight" USING weightSensor AND maximumWeight
+  FOR EACH elevator in elevators
+    SET maximumWeight TO 3500 lbs THEN
+    READ weightSensor THEN
+      IF weightSensor value is less than or equals 3500 lbs THEN
+        SET heavyElevatorMessage TO "ON" THEN                                                
+        CALL openDoors
+      ELSE IF weightSensor value is less than 3500 lbs
+        SET heavyElevatorMessage TO "OFF"                                                 
+      END IF
+  END FOR
+
+END SEQUENCE
+
+
+'------------------RETURN ELEVATOR TO FLOOR 1-------------------------------
+
+SEQUENCE "returnOrigin"
+  SET origin to 1
+  IF elevatorStatus equals idle
+    IF columns equals columnB, columnC, columnD
+     CALL elevatorDown UNTIL elevatorFloor = origin THEN
+    ELSE IF column equals columnA  
+      CALL elevatorUp UNTIL elevatorFloor = origin THEN   
+    END IF 
+     
+END SEQUENCE
+
+
+'-------------------SEND REQUEST-----------------------------------------
+------
+SEQUENCE "sendRequest" USING elevator AND currentFloor
+  ADD requestedFloor to elevatorFloorList THEN
+  CALL computeList WITH  elevatorDirection and floorList and requestedFloor
+  SET elevatorFloorList to computedList
+END SEQUENCE
+
+'------------------LISTE ORDER WITH COMPUTE LIST----------------------------------------------
+-----
+SEQUENCE "computeList" USING elevatorDirection AND floorList and requestedFloor
+    IF elevatorDirection equals "up" THEN
+      compute sort floorList by "ascending"
+    ELSE IF direction equals "down"
+      compute sort floorList by "descending"
+    END IF
+    SET floorList to computedList
+  return  computedList
+END SEQUENCE
+
+
+'----------  FIND COLUMN ---------------------------------------------------------
+-------
+SEQUENCE "findColumn" using requestedFloor
+  FOR EACH column in columnsList
+
+    IF requestedFloor is between SS6 and 1                                
+      DISPLAY columnA to lobbyFloorDisplayconsole
+      RETURN columnA
+
+   ELSE IF requestedFloor is beteew 2 and 20                             
+    DISPLAY columnB to lobbyFloorDisplayconsole
+    RETURN columnB
+
+   ELSE IF requestedFloor is bwteew 21 and 40
+    DISPLAY columnC to lobbyFloorDisplayconsole
+    RETURN columnC
+
+   ELSE IF requestedFloor is bwteew 41 and 60
+    DISPLAY columnD to lobbyFloorDisplayconsole
+    RETURN columnD
+   END IF
+  END FOR
+END SEQUENCE
+
+--------------------------------------------------------------------------------
