@@ -179,7 +179,7 @@ class Column {
                 return elevator
             }
             else {
-                var lessBusyElevator = this.findLessBusyElevator(floor)
+                var elevator = this.findLessBusyElevator(floor)
                 return elevator
             }
 
@@ -264,35 +264,7 @@ class Column {
         return elevator
     }
 
-//---------- REQUESTLIST FUNCTION ----------------
-
-    requestedList() {
-
-        
-
-        var inputList = []
-        console.log(inputList)
-        var floors = new elevator.elevatorButton(requestedFloor)
-        var colFloor = findBestElevator
-    
-
-        inputList.push({colFloor});
-        inputList.push({floors});
-        var list = inputList.sort(function (a, b) {
-        return a.input - b.input
-        });
-        var smallestInput = list[0]
-        elevatorGoToNextFloor = smallestInput
-        return elevatorGoToNextFloor  
 }
-
-
-}
-
-
-
-//-------------------------------------------------------------------------------------------------
-
 //----------  ELEVATORCONTROLLER CLASS ----------
 
 class ElevatorController {
