@@ -1,139 +1,154 @@
-#!/usr/bin/python
+def main():
 
-def main():
+column = Column[10, 2]
+elevator = Elevator[10, 10, 2]
 
-    column = Column[10,2]
-    elevator = Elevator[10,2]
+# ELEVATOR CLASS-------------------------------------
 
-class Elevator():
-    def _init_(self,elevatorId,currentFloor,totalFloor):
-        self.elevatorId = elevatorId
-        self.floorRequestButton = []
-        self.elevatorDirection = ""
-        self.elevatorStatus = "idle"
-        self.currentFloor = currentFloor
-        self.requestedList = []
-        self.door = "closed"
+class Elevator():
+    def _init_(self, elevatorId, currentFloor, totalFloor):
+        self.elevatorId = elevatorId
+        self.floorRequestButton = []
+        self.elevatorDirection = ""
+        self.elevatorStatus = "idle"
+        self.currentFloor = currentFloor
+        self.requestedList = []
+        self.door = "closed"
+        for i in range(totalFloor):
+            self.floorRequestButton.append(i)
 
-        for i in range(totalFloor):
-            self.floorRequestButton.append(i)
-    
-    def move(self):
-        if self.requestedList[0] > self.currentFloor
-            self.elevatorStatus(up)
+# MOVE FUNCTION
 
-            elif self.requestedList[0] < self.currentFloor
-            self.elevatorStatus(down)
+    def move(self):
+        if self.requestList[0] > self.currentFloor:
+           self.elevatorUp(up)
 
-    def elevatorUp(self)
-        while self.requestedList != self.currentFloor 
-            self.currentFloor +=
+            elif self.requestList[0] < self.currentFloor:
+            self.elevatorDown(down)
 
-    def elevatorDown(self)
-        while self.requestedList != self.currentFloor 
-            self.currentFloor -=                 
+    def elevatorUp(self):
+        while self.requestedList != self.currentFloor:
+            self.currentFloor +=
 
+    def elevatorDown(self):
+        while self.requestedList != self.currentFloor:
+            self.currentFloor -=
 
+# COLUMN CLASS---------------------------------------
+class Column():
+    def _init_(self, id, numberElevator, totalFloor):
+        self.id = id
+        self.elevatorList = []
+        self.callButtonList = []
+        self.totalFloor = totalFloor
 
+            for i in range(totalFloor):
+                self.floorTotal.append(i)
+                if i != 1:
+                callButton = new CallButton("down", i)
+                self.callButtonList.push(callButton)
 
+                if i != totalFloor:
+                        callButton = new CallButton("up", i)
+                        self.callButtonList.push(callButton)
 
-main()
+# LIST OF ELEVATORS
 
+    for i in range(numberElevator):
+        self.floorRequestButton.append(i)
 
+# FINDBESTELEVATOR FUNCTION -----------------------
 
+    def findBestElevator(self, floor, direction):
+        for i in range(self.elevatorList):
+            elevator = self.elevatorList
 
+# 1ST CONDITION CURRENT FLOOR = ELEVATOR FLOOR &  DIRECTION = ELEVATORDIRECTION
+            if (floor == elevator.currentFloor & & direction == elevator.elevatorDirection:
+            return elevator
 
+# 2ND CONDITION CURRENTFLOOR > ELEVATORFLOOR && ELEVATORSTATUS = MOVING OR STOPPED && ELEVATORDIRECTION = DIRECTION --
+             if floor > elevator.currentFloor & & direction == elevator.elevatorDirection:
+                elevator = self.findClosestElevator(floor, direction)
+             return elevator
 
+# 3RD CONDITION CURRENTFLOOR < ELEVATORFLOOR && ELEVATORSTATUS = MOVING OR STOPPED && ELEVATORDIRECTION = DIRECTION --
+            elif floor < elevator.currentFloor & & direction == elevator.elevatorDirection:
+                elevator = self.findClosestElevator(floor, direction)
+            return elevator
 
+# 4TH CONDITION CURRENTFLOOR = ELEVATORFLOOR && ELEVATORSTATUS = IDLE
+            elif floor == elevator.currentFloor & & elevator.elevatorStatus == "idle":
+            return elevator
 
-  controller = Controller(2,10)
-  elevator = Elevator(10,2)
-  controller.move(elevator.direction,elevator.elevatorNumber[1])
+# 5th CONDITION ELEVATORSTATUS = IDLE--
+            elif elevator.elevatorStatus == "idle":
+                elevator = self.findClosestElevator(floor, direction)
+            return elevator
 
-class Controller():
-  def __init__(self,elevator,floor):
-    self.elevator = elevator
-    self.floor = floor
-    self.direction = "up"
-
-    
-  def move(self,direction, elevator):
-    print("elevator: ", elevator)
-    print("Moving :", direction)
-
-
-
-class Elevator():
-  def __init__(self,floorTotal,elevatorNumber):
-    self.elevatorNumber = []
-    self.floorTotal = []
-    self.currentFloor = 1
-    self.status = "idle"
-    self.direction = "Up"  
-
-    for i in range(floorTotal):
-        self.floorTotal.append(i)
-    print(self.floorTotal)  
-
-    for i in range(elevatorNumber):
-        self.elevatorNumber.append(i)
-    print(self.elevatorNumber)
-
-
-
-//----------   ELEVATOR CLASS  ----------
-
-class Elevator {
-    constructor(elevatorId, currentFloor, totalFloor) {
-
-        this.elevatorId = elevatorId
-        this.floorRequestButton = []
-        this.elevatorDirection = ""                                 // ---   "up"   or   "down"  -----
-        this.elevatorStatus = "idle" 
-        this.currentFloor = currentFloor
-        this.requestList = []                                       ////////////////////////////////////////
-        this.door = "closed"                                         // ("opened", "closed")
-
-        for (var i = 1; i <= totalFloor; i++) {
-            let elevatorButton = new ElevatorButton() 
-            this.floorRequestButton.push(elevatorButton);
-          //     //console.log(this.elevatorDirection)                                          //------------------
-
-        }
-//        console.log(this.requestedList)
-    }
+# 6th CONDITION FINDLESSBUSYELEVATOR
+            else:
+                elevator = self.findLessBusyElevator(floor)
+            return elevator
 
 
-    move() {
-        if (this.requestList[0] > this.currentFloor) {
-            this.elevatorUp()
-        } else if (this.requestList[0] < this.currentFloor) {
-            this.elevatorDown()
-        }
-        
-    }
+    def findClosestElevator(self, floor, direction):
 
-    elevatorUp() {
-        //   //console.log(requestList);
-        //   //console.log(currentFloor);
-        while (this.requestList[0] != this.currentFloor) { //////////////Floor and currentFloor //////
-            this.currentFloor ++
-       }
-    }
-       
-    elevatorDown() { //////////////Floor and currentFloor //////
-        //   //console.log(requestList);
-        //   //console.log(currentFloor);
-        while (this.requestList[0] != this.currentFloor) { //////////////Floor and currentFloor //////
-            this.currentFloor --
-        }
-    }  
-}
+        activeList = []
+        elevator
 
+        for i in range(self.elevatorList):
+            elevator = self.elevatorList
 
+            diff = floor - elevator.currentFloor
+            gap = abs(diff)
+            activeList.append(elevator, gap)
 
+            shortestGap = sort(activeList)
+            elevator = shortestGap[0].elvator
+            return elevator
 
+    def findLessBusyElevator(self,  floor):
+        elevator
 
+        for i in range(self.elevatorList):
+            elevator = self.elevatorList
+    
+            gapList = []
+            
+            if floor < elevator.currentFloor, elevator.elevatorDirection = "up":
+                gapDiff = self.totalFloor - elevator.currentFloor
 
+                gapList.append(elevator, gapDiff)
+                smallestGap = sort(gapList) 
+                elevator = smallestGap[0].elevator
+                return elevator
 
-  
+            else floor > elevator.currentFloor, elevator.elevatorDirection = "down":
+                gapDiff = elevator.currentFloor - 1
+                gapList.append(elevator, gapDiff)
+                smallestGap = sort(gapList) 
+                elevator = smallestGap[0].ele
+vator
+                return elevator
+
+# ELEVATOR CONTROL CLASS -------------------------------------
+class ElevatorController():
+    def _init_(self, id, elevatorNumber, totalFloor):
+    
+        self.column = new Column(nbColumn, numberElevator, totalFloor)
+
+    def requestElevator(self, floor, direction):
+        bestElevator = self.column.findBestElevator(floor, direction)
+        bestElevator.requestList.append(floor)
+        bestElevator.move()
+        bestElevator.requestList.remove(floor)
+        return bestElevator
+       
+
+    def requestFloor(self, requestedFloor, elevator):
+        requestFloor = requestedFloor
+        elevator.requestList.append(requestedFloor)
+        elevator.move()
+        elevator.requestList.remove()
+    
